@@ -10,6 +10,7 @@ import com.plog.domain.post.dto.PostListRes;
 import com.plog.domain.post.dto.PostUpdateReq;
 import com.plog.domain.post.entity.Post;
 import com.plog.domain.post.repository.PostRepository;
+import com.plog.domain.search.service.PostSearchService;
 import com.plog.global.exception.exceptions.AuthException;
 import com.plog.global.exception.exceptions.PostException;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,9 @@ public class PostServiceTest {
     @Mock
     private PostHashTagRepository postHashTagRepository;
 
+    @Mock
+    private PostSearchService postSearchService;
+
     @Test
     @DisplayName("게시글 저장 시 마크다운이 제거된 요약글이 자동 생성")
     void createPostSuccess() {
@@ -76,6 +80,7 @@ public class PostServiceTest {
         assertThat(savedPost.getTitle()).isEqualTo("테스트 제목");
         assertThat(savedPost.getSummary()).isEqualTo("Hello\nSpring Boot");
         assertThat(savedPost.getMember().getId()).isEqualTo(memberId);
+        verify(postSearchService).index(savedPost);
     }
 
     @Test
@@ -165,6 +170,7 @@ public class PostServiceTest {
         assertThat(existingPost.getTitle()).isEqualTo(newTitle);
         assertThat(existingPost.getContent()).isEqualTo(newContent);
         assertThat(existingPost.getSummary()).contains("수정된 본문"); // 요약본 갱신 확인
+        verify(postSearchService).index(existingPost);
     }
 
     @Test
@@ -231,6 +237,7 @@ public class PostServiceTest {
         verify(postRepository).delete(post);
         verify(commentRepository).deleteParentsByPostId(postId);
         verify(commentRepository).deleteRepliesByPostId(postId);
+        verify(postSearchService).delete(postId);
     }
 
     @Test
