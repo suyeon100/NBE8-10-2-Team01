@@ -44,6 +44,7 @@ dependencies {
     implementation 'io.minio:minio:8.5.7'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
     // 4. API Documentation (SpringDoc v3)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0'
@@ -62,18 +63,25 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 }
 
-// .env 로부터 테스트 환경변수 로드
+// .env 로부터 로컬 환경변수 로드
 def envProps = new Properties()
-file('.env').withInputStream { stream ->
-    stream.withReader('UTF-8') { reader ->
-        reader.eachLine { line ->
-            line = line.trim()
-            if (line && !line.startsWith('#') && line.contains('=')) {
-                def (k, v) = line.split('=', 2)
-                envProps[k] = v
+def envFile = file('.env')
+if (envFile.exists()) {
+    envFile.withInputStream { stream ->
+        stream.withReader('UTF-8') { reader ->
+            reader.eachLine { line ->
+                line = line.trim()
+                if (line && !line.startsWith('#') && line.contains('=')) {
+                    def (k, v) = line.split('=', 2)
+                    envProps[k] = v
+                }
             }
         }
     }
+}
+
+tasks.named('bootRun') {
+    environment envProps
 }
 
 tasks.named('test') {

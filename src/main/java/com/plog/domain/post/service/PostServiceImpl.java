@@ -18,6 +18,8 @@ import com.plog.domain.post.dto.PostUpdateReq;
 import com.plog.domain.post.entity.Post;
 import com.plog.domain.post.entity.PostStatus;
 import com.plog.domain.post.repository.PostRepository;
+import com.plog.domain.search.event.PostSearchEvent;
+import com.plog.domain.search.event.PostSearchEventType;
 import com.plog.global.exception.errorCode.AuthErrorCode;
 import com.plog.global.exception.errorCode.PostErrorCode;
 import com.plog.global.exception.exceptions.AuthException;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +63,7 @@ public class PostServiceImpl implements PostService {
     private final MemberRepository memberRepository;
     private final PostHashTagRepository postHashTagRepository;
     private final HashTagRepository hashTagRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -79,6 +83,7 @@ public class PostServiceImpl implements PostService {
         post = postRepository.save(post);
 
         applyTags(post, req.hashtags());
+        eventPublisher.publishEvent(new PostSearchEvent(post.getId(), PostSearchEventType.INDEX));
 
         return post.getId();
     }
@@ -146,6 +151,7 @@ public class PostServiceImpl implements PostService {
         postHashTagRepository.deleteAllByPostId(postId);
 
         applyTags(post, req.hashtags()); // 공통 로직 호출
+        eventPublisher.publishEvent(new PostSearchEvent(postId, PostSearchEventType.INDEX));
     }
 
     @Override
@@ -171,6 +177,7 @@ public class PostServiceImpl implements PostService {
         postHashTagRepository.deleteAllByPostId(postId);
         // 6. 게시물 삭제
         postRepository.delete(post);
+        eventPublisher.publishEvent(new PostSearchEvent(postId, PostSearchEventType.DELETE));
     }
 
     @Override
