@@ -1,9 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:plog-test;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
   jpa:
     show-sql: true
     hibernate:
@@ -13,7 +8,3 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-
-custom:
-  jwt:
-    secretKey: test-secret-key-for-jwt-signing-123456

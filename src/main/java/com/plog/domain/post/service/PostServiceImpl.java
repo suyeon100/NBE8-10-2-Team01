@@ -18,7 +18,6 @@ import com.plog.domain.post.dto.PostUpdateReq;
 import com.plog.domain.post.entity.Post;
 import com.plog.domain.post.entity.PostStatus;
 import com.plog.domain.post.repository.PostRepository;
-import com.plog.domain.search.service.PostSearchService;
 import com.plog.global.exception.errorCode.AuthErrorCode;
 import com.plog.global.exception.errorCode.PostErrorCode;
 import com.plog.global.exception.exceptions.AuthException;
@@ -61,7 +60,6 @@ public class PostServiceImpl implements PostService {
     private final MemberRepository memberRepository;
     private final PostHashTagRepository postHashTagRepository;
     private final HashTagRepository hashTagRepository;
-    private final PostSearchService postSearchService;
 
     @Override
     @Transactional
@@ -81,7 +79,6 @@ public class PostServiceImpl implements PostService {
         post = postRepository.save(post);
 
         applyTags(post, req.hashtags());
-        postSearchService.index(post);
 
         return post.getId();
     }
@@ -149,7 +146,6 @@ public class PostServiceImpl implements PostService {
         postHashTagRepository.deleteAllByPostId(postId);
 
         applyTags(post, req.hashtags()); // 공통 로직 호출
-        postSearchService.index(post);
     }
 
     @Override
@@ -175,7 +171,6 @@ public class PostServiceImpl implements PostService {
         postHashTagRepository.deleteAllByPostId(postId);
         // 6. 게시물 삭제
         postRepository.delete(post);
-        postSearchService.delete(postId);
     }
 
     @Override
