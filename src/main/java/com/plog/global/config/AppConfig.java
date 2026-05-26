@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestClient;
 
 /**
  * 애플리케이션 전역에서 사용되는 공통 인프라 빈을 설정하는 클래스입니다.
@@ -35,6 +36,16 @@ public class AppConfig {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    /**
+     * 외부 HTTP API 호출에 사용할 RestClient.Builder를 Bean으로 등록합니다.
+     *
+     * @return RestClient.Builder 인스턴스
+     */
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
     }
 
     /**
