@@ -39,6 +39,10 @@ minio:
   access_key: ${MINIO_ACCESS_KEY}
   secret_key: ${MINIO_SECRET_KEY}
   bucket: team-bucket
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 custom:
