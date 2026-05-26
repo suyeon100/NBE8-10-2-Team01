@@ -4,11 +4,13 @@ import com.plog.domain.post.dto.PostListRes;
 import com.plog.domain.search.service.PostSearchService;
 import com.plog.global.response.CommonResponse;
 import com.plog.global.response.Response;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,13 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
+@Validated
 public class SearchController {
 
     private final PostSearchService postSearchService;
 
     @GetMapping("/posts")
     public ResponseEntity<Response<Slice<PostListRes>>> searchPosts(
-            @RequestParam String keyword,
+            @RequestParam @NotBlank(message = "검색어는 필수 입력 항목입니다.") String keyword,
             @PageableDefault(size = 10) Pageable pageable
     ) {
         Slice<PostListRes> posts = postSearchService.search(keyword, pageable);

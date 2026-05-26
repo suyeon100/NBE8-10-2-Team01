@@ -32,7 +32,7 @@ public class PostSearchServiceImpl implements PostSearchService {
         try {
             postSearchRepository.save(PostSearchDocument.from(post));
         } catch (Exception e) {
-            log.warn("[PostSearchServiceImpl#index] failed. postId={}, cause={}", post.getId(), e.getMessage());
+            log.warn("[PostSearchServiceImpl#index] failed. postId={}", post.getId(), e);
         }
     }
 
@@ -41,7 +41,7 @@ public class PostSearchServiceImpl implements PostSearchService {
         try {
             postSearchRepository.deleteById(postId);
         } catch (Exception e) {
-            log.warn("[PostSearchServiceImpl#delete] failed. postId={}, cause={}", postId, e.getMessage());
+            log.warn("[PostSearchServiceImpl#delete] failed. postId={}", postId, e);
         }
     }
 
@@ -55,7 +55,7 @@ public class PostSearchServiceImpl implements PostSearchService {
             return postSearchRepository.searchByKeywordAndStatus(keyword.trim(), PostStatus.PUBLISHED.name(), pageable)
                     .map(PostSearchDocument::toPostListRes);
         } catch (Exception e) {
-            log.warn("[PostSearchServiceImpl#search] failed. keyword={}, cause={}", keyword, e.getMessage());
+            log.warn("[PostSearchServiceImpl#search] failed. keyword={}", keyword, e);
             return new SliceImpl<>(List.of(), pageable, false);
         }
     }

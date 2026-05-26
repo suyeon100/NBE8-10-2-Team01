@@ -83,4 +83,17 @@ class SearchControllerTest extends WebMvcTestSupport {
 
         verify(postSearchService).search(eq("elastic"), any(Pageable.class));
     }
+
+    @Test
+    @DisplayName("게시글 검색 시 키워드가 공백이면 400 Bad Request를 반환한다")
+    void searchPostsFailBlankKeyword() throws Exception {
+        // [When]
+        ResultActions resultActions = mockMvc.perform(get("/api/search/posts")
+                        .param("keyword", " ")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // [Then]
+        resultActions.andExpect(status().isBadRequest());
+    }
 }
