@@ -10,6 +10,8 @@ import com.plog.domain.post.dto.PostListRes;
 import com.plog.domain.post.dto.PostUpdateReq;
 import com.plog.domain.post.entity.Post;
 import com.plog.domain.post.repository.PostRepository;
+import com.plog.domain.search.event.PostSearchEvent;
+import com.plog.domain.search.event.PostSearchEventType;
 import com.plog.global.exception.exceptions.AuthException;
 import com.plog.global.exception.exceptions.PostException;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -32,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.argThat;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -50,6 +54,9 @@ public class PostServiceTest {
 
     @Mock
     private PostHashTagRepository postHashTagRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Test
     @DisplayName("게시글 저장 시 마크다운이 제거된 요약글이 자동 생성")
@@ -76,6 +83,9 @@ public class PostServiceTest {
         assertThat(savedPost.getTitle()).isEqualTo("테스트 제목");
         assertThat(savedPost.getSummary()).isEqualTo("Hello\nSpring Boot");
         assertThat(savedPost.getMember().getId()).isEqualTo(memberId);
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
+                event instanceof PostSearchEvent searchEvent
+                        && searchEvent.type() == PostSearchEventType.INDEX));
     }
 
     @Test
@@ -165,6 +175,10 @@ public class PostServiceTest {
         assertThat(existingPost.getTitle()).isEqualTo(newTitle);
         assertThat(existingPost.getContent()).isEqualTo(newContent);
         assertThat(existingPost.getSummary()).contains("수정된 본문"); // 요약본 갱신 확인
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
+                event instanceof PostSearchEvent searchEvent
+                        && searchEvent.postId().equals(postId)
+                        && searchEvent.type() == PostSearchEventType.INDEX));
     }
 
     @Test
@@ -231,6 +245,10 @@ public class PostServiceTest {
         verify(postRepository).delete(post);
         verify(commentRepository).deleteParentsByPostId(postId);
         verify(commentRepository).deleteRepliesByPostId(postId);
+        verify(eventPublisher).publishEvent(argThat((Object event) ->
+                event instanceof PostSearchEvent searchEvent
+                        && searchEvent.postId().equals(postId)
+                        && searchEvent.type() == PostSearchEventType.DELETE));
     }
 
     @Test

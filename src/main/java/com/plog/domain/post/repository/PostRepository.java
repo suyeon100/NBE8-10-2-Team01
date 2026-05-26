@@ -36,7 +36,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     /**
      * 게시글 조회: 작성자(Member), 해시태그(PostHashTag)를 한 번의 쿼리로 함께 가져옵니다.
      */
-    @Query("select p from Post p join fetch p.member left join fetch p.postHashTags where p.id = :id")
+    @Query("select distinct p from Post p " +
+            "join fetch p.member m " +
+            "left join fetch m.profileImage " +
+            "left join fetch p.postHashTags " +
+            "where p.id = :id")
     Optional<Post> findByIdWithMember(@Param("id") Long id);
 
     /**

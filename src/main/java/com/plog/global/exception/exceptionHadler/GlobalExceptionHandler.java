@@ -1,6 +1,7 @@
 package com.plog.global.exception.exceptionHadler;
 
 import com.plog.global.response.CommonResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
@@ -167,6 +169,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodValidationException(
             MethodValidationException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return fail("Method-level validation failed", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    protected ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .findFirst()
+                .orElse("Validation failed");
+        return fail(message, HttpStatus.BAD_REQUEST);
     }
 
     // EIS - 서버 내부 오류
